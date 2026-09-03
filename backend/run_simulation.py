@@ -1,5 +1,7 @@
-"""Script d'exécution de la simulation LIYANZA dans le terminal."""
+"""Script d'exécution de la simulation LIYANZA avec rendu commercial lisible."""
+import argparse
 import json
+import sys
 from app.schemas.simulation import (
     GenderEnum,
     ObjectiveEnum,
@@ -7,9 +9,20 @@ from app.schemas.simulation import (
     TargetAudienceSchema,
 )
 from app.services.campaign.simulation.engine import SimulationEngine
+from app.services.campaign.simulation.formatter import SimulationFormatter
+
+# Assurer l'encodage UTF-8 dans les terminaux Windows
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Exécuteur de simulation publicitaire LIYANZA")
+    parser.add_argument(
+        "--json", action="store_true", help="Afficher le résultat brut en JSON"
+    )
+    args = parser.parse_args()
+
     payload = SimulationInputSchema(
         total_budget_fcfa=150000.0,
         audience=TargetAudienceSchema(
@@ -27,7 +40,11 @@ def main():
     )
 
     response = SimulationEngine.run(payload)
-    print(json.dumps(response.model_dump(mode="json"), indent=2, ensure_ascii=False))
+
+    if args.json:
+        print(json.dumps(response.model_dump(mode="json"), indent=2, ensure_ascii=False))
+    else:
+        print(SimulationFormatter.format_text_report(response))
 
 
 if __name__ == "__main__":
