@@ -27,15 +27,39 @@ class SimulationFormatter:
             f"  • Centres d'intérêt         : {', '.join(inp.audience.interests) if inp.audience.interests else 'Général'}",
             "",
             "--------------------------------------------------------------------------------",
-            " 💡 2. ALLOCATION RECOMMANDÉE DU BUDGET",
+            " 💡 2. ALLOCATION RECOMMANDÉE DU BUDGET (3 OPTIONS STRATÉGIQUES)",
             "--------------------------------------------------------------------------------",
-            f"  🔹 Meta Ads (Notoriété & Retargeting) : {pres.meta_ads_allocation.budget_fcfa:,.0f} FCFA ({pres.meta_ads_allocation.budget_percentage:.1f}%)"
-            f" — [{pres.meta_ads_allocation.daily_budget_fcfa:,.0f} FCFA/j]",
-            f"  🔹 Click-to-WhatsApp (Ventes directes) : {pres.whatsapp_ads_allocation.budget_fcfa:,.0f} FCFA ({pres.whatsapp_ads_allocation.budget_percentage:.1f}%)"
-            f" — [{pres.whatsapp_ads_allocation.daily_budget_fcfa:,.0f} FCFA/j]",
-            "",
         ]
 
+        if pres.allocation_options:
+            for option in pres.allocation_options:
+                meta = option.meta_ads_allocation
+                wa = option.whatsapp_ads_allocation
+                p = option.projections
+                lines.extend([
+                    f"  📌 {option.name}",
+                    f"     • Accroche          : {option.tagline}",
+                    f"     • Meta Ads          : {meta.budget_fcfa:,.0f} FCFA ({meta.budget_percentage:.1f}%) — [{meta.daily_budget_fcfa:,.0f} FCFA/j]",
+                    f"     • Click-to-WhatsApp : {wa.budget_fcfa:,.0f} FCFA ({wa.budget_percentage:.1f}%) — [{wa.daily_budget_fcfa:,.0f} FCFA/j]",
+                ])
+                if p:
+                    lines.extend([
+                        f"     📊 Impact CA & Performances Estimatives :",
+                        f"        • Leads WhatsApp qualifiés : ~{p.expected_leads:,} prospects",
+                        f"        • Ventes estimées          : {p.expected_sales_mean} ventes ({p.expected_sales_min} à {p.expected_sales_max})",
+                        f"        • Chiffre d'Affaires estimé: {p.expected_revenue_fcfa_mean:,.0f} FCFA ({p.expected_revenue_fcfa_min:,.0f} à {p.expected_revenue_fcfa_max:,.0f} FCFA)",
+                        f"        • Coût d'Acquisition (CAC) : {p.cost_per_acquisition_fcfa:,.0f} FCFA / client",
+                        f"        • Retour sur Pub (ROAS)    : x {p.roas_mean:.1f} (1 000 FCFA → {p.roas_mean * 1000:,.0f} FCFA CA)",
+                    ])
+                lines.append("")
+        else:
+            lines.extend([
+                f"  🔹 Meta Ads (Notoriété & Retargeting) : {pres.meta_ads_allocation.budget_fcfa:,.0f} FCFA ({pres.meta_ads_allocation.budget_percentage:.1f}%)",
+                f" — [{pres.meta_ads_allocation.daily_budget_fcfa:,.0f} FCFA/j]",
+                f"  🔹 Click-to-WhatsApp (Ventes directes) : {pres.whatsapp_ads_allocation.budget_fcfa:,.0f} FCFA ({pres.whatsapp_ads_allocation.budget_percentage:.1f}%)",
+                f" — [{pres.whatsapp_ads_allocation.daily_budget_fcfa:,.0f} FCFA/j]",
+                "",
+            ])
         if pres.operational_bottleneck_detected:
             lines.extend([
                 "  ⚠️ ALERTE CAPACITÉ COMMERCIAL :",

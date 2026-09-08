@@ -50,9 +50,15 @@ def test_simulation_engine_full_run():
     # 3. Vérification de l'indice de confiance
     assert 0.65 <= proj.confidence_score <= 0.95
 
-    # 4. Formats et créneaux horaires
+    # 4. Formats, créneaux horaires et options d'allocation avec projections dédiées
     assert len(response.prescription.recommended_time_slots) >= 2
     assert len(response.prescription.recommended_formats) >= 2
+    assert len(response.prescription.allocation_options) == 3
+
+    for opt in response.prescription.allocation_options:
+        assert opt.projections is not None
+        assert opt.projections.expected_revenue_fcfa_mean >= 0
+        assert opt.projections.reach_min > 0
 
 
 def test_simulation_engine_invalid_budget():

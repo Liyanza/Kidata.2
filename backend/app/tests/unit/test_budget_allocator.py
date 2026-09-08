@@ -73,3 +73,44 @@ def test_budget_allocator_bottleneck_capping(douala_benchmark):
     assert prescription.operational_bottleneck_detected is True
     assert prescription.max_supported_leads == 100
     assert "Alerte Capacité Commerciale" in prescription.rationale
+
+
+def test_budget_allocator_three_options(douala_benchmark):
+    """Vérifie que 3 options d'allocation distinctes sont bien générées et valides."""
+    form = SimulationInputSchema(
+        total_budget_fcfa=100000.0,
+        audience=TargetAudienceSchema(
+            age_range="25-35",
+            gender=GenderEnum.ALL,
+            interests=["Mode"],
+        ),
+        objective=ObjectiveEnum.SALES,
+        duration_days=10,
+        target_zone="Douala",
+        average_basket_fcfa=15000.0,
+        daily_lead_capacity=50,
+    )
+
+    allocator = BudgetAllocator(douala_benchmark)
+    prescription = allocator.allocate(form)
+
+    # Doit contenir exactement 3 options d'allocation
+    assert len(prescription.allocation_options) == 3
+
+    opt_rec = prescription.allocation_options[0]
+    opt_conv = prescription.allocation_options[1]
+    opt_reach = prescription.allocation_options[2]
+
+    # Vérification des types de stratégie
+    assert opt_rec.strategy_type.value == "recommended"
+    assert opt_conv.strategy_type.value == "max_conversion"
+    assert opt_reach.strategy_type.value == "max_reach"
+
+    # Vérification que chaque option a une somme égale au budget total (100 000 FCFA)
+    for opt in prescription.allocation_options:
+        total = opt.meta_ads_allocation.budget_fcfa + opt.whatsapp_ads_allocation.budget_fcfa
+        assert pytest.approx(total, 0.01) == 100000.0
+
+    # Max Conversion doit avoir une part WhatsApp supérieure ou égale à Max Visibilité
+    assert opt_conv.whatsapp_ads_allocation.budget_fcfa >= opt_reach.whatsapp_ads_allocation.budget_fcfa
+
