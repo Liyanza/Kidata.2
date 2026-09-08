@@ -24,19 +24,19 @@ def main():
     args = parser.parse_args()
 
     payload = SimulationInputSchema(
-        total_budget_fcfa=150000.0,
+        total_budget_fcfa=450000.0,
         audience=TargetAudienceSchema(
-            age_range="25-35",
+            age_range="19-25",
             gender=GenderEnum.ALL,
             interests=["Mode", "Sneakers", "Accessoires"],
         ),
         objective=ObjectiveEnum.SALES,
-        duration_days=14,
-        target_zone="Douala",
-        average_basket_fcfa=15000.0,
-        daily_lead_capacity=25,
-        facebook_followers=3500,
-        whatsapp_contacts=450,
+        duration_days=28,
+        target_zone="Bafoussam",
+        average_basket_fcfa=30000.0,
+        daily_lead_capacity=30,
+        facebook_followers=25000,
+        whatsapp_contacts=385,
     )
 
     response = SimulationEngine.run(payload)

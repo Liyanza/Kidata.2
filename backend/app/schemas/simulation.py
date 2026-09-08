@@ -98,38 +98,16 @@ class SimulationInputSchema(BaseModel):
     )
 
 
+class AllocationStrategyTypeEnum(str, Enum):
+    RECOMMENDED = "recommended"
+    MAX_CONVERSION = "max_conversion"
+    MAX_REACH = "max_reach"
+
+
 class ChannelAllocationSchema(BaseModel):
     budget_fcfa: float = Field(..., description="Budget alloué au canal en FCFA")
     budget_percentage: float = Field(..., description="Part relative du budget total en %")
     daily_budget_fcfa: float = Field(..., description="Budget moyen disponible par jour en FCFA")
-
-
-class TimeSlotSchema(BaseModel):
-    start_time: str = Field(..., description="Heure de début (ex: '12:00')")
-    end_time: str = Field(..., description="Heure de fin (ex: '14:00')")
-    rationale: str = Field(..., description="Justification comportementale locale")
-
-
-class FormatRecommendationSchema(BaseModel):
-    channel: str = Field(..., description="Canal concerné ('Meta Ads' ou 'Click-to-WhatsApp')")
-    format_name: str = Field(..., description="Nom du format publicitaire recommandé")
-    description: str = Field(..., description="Directives créatives et d'accroche")
-
-
-class PrescriptionOutputSchema(BaseModel):
-    meta_ads_allocation: ChannelAllocationSchema
-    whatsapp_ads_allocation: ChannelAllocationSchema
-    recommended_time_slots: List[TimeSlotSchema]
-    recommended_formats: List[FormatRecommendationSchema]
-    rationale: str = Field(..., description="Explication stratégique de la répartition")
-    operational_bottleneck_detected: bool = Field(
-        ...,
-        description="Indique si la capacité WhatsApp a plafonné le budget WhatsApp au profit de Meta Ads",
-    )
-    max_supported_leads: int = Field(
-        ...,
-        description="Capacité totale maximale de leads traitables sur la durée de la campagne",
-    )
 
 
 class ProjectionOutputSchema(BaseModel):
@@ -153,6 +131,48 @@ class ProjectionOutputSchema(BaseModel):
         ge=0.0,
         le=1.0,
         description="Indice de confiance statistique du modèle prédictif",
+    )
+
+
+class BudgetAllocationOptionSchema(BaseModel):
+    strategy_type: AllocationStrategyTypeEnum = Field(..., description="Type de stratégie d'allocation")
+    name: str = Field(..., description="Nom commercial de la stratégie d'allocation")
+    tagline: str = Field(..., description="Accroche ou positionnement stratégique résumé")
+    meta_ads_allocation: ChannelAllocationSchema = Field(..., description="Allocation Meta Ads")
+    whatsapp_ads_allocation: ChannelAllocationSchema = Field(..., description="Allocation Click-to-WhatsApp")
+    projections: Optional[ProjectionOutputSchema] = Field(None, description="Projections et impact CA spécifiques à cette stratégie")
+    description: str = Field(..., description="Explication détaillée de la stratégie et des cas d'usage")
+
+
+class TimeSlotSchema(BaseModel):
+    start_time: str = Field(..., description="Heure de début (ex: '12:00')")
+    end_time: str = Field(..., description="Heure de fin (ex: '14:00')")
+    rationale: str = Field(..., description="Justification comportementale locale")
+
+
+class FormatRecommendationSchema(BaseModel):
+    channel: str = Field(..., description="Canal concerné ('Meta Ads' ou 'Click-to-WhatsApp')")
+    format_name: str = Field(..., description="Nom du format publicitaire recommandé")
+    description: str = Field(..., description="Directives créatives et d'accroche")
+
+
+class PrescriptionOutputSchema(BaseModel):
+    meta_ads_allocation: ChannelAllocationSchema
+    whatsapp_ads_allocation: ChannelAllocationSchema
+    allocation_options: List[BudgetAllocationOptionSchema] = Field(
+        default_factory=list,
+        description="Les 3 types d'allocation budgétaire recommandées (Équilibrée, Max Ventes, Max Visibilité)",
+    )
+    recommended_time_slots: List[TimeSlotSchema]
+    recommended_formats: List[FormatRecommendationSchema]
+    rationale: str = Field(..., description="Explication stratégique de la répartition")
+    operational_bottleneck_detected: bool = Field(
+        ...,
+        description="Indique si la capacité WhatsApp a plafonné le budget WhatsApp au profit de Meta Ads",
+    )
+    max_supported_leads: int = Field(
+        ...,
+        description="Capacité totale maximale de leads traitables sur la durée de la campagne",
     )
 
 

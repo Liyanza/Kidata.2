@@ -23,8 +23,17 @@ class SimulationEngine:
         allocator = BudgetAllocator(city_benchmark=benchmark)
         prescription = allocator.allocate(form=validated_form)
 
-        # 3. Algorithme Prédictif (Projections chiffrées & Score de confiance)
+        # 3. Algorithme Prédictif (Projections chiffrées & Score de confiance pour chaque option)
         estimator = MetricsEstimator(city_benchmark=benchmark)
+        for option in prescription.allocation_options:
+            option.projections = estimator.estimate_for_allocations(
+                form=validated_form,
+                meta_budget=option.meta_ads_allocation.budget_fcfa,
+                wa_budget=option.whatsapp_ads_allocation.budget_fcfa,
+                max_supported_leads=prescription.max_supported_leads,
+                bottleneck=prescription.operational_bottleneck_detected,
+            )
+
         projections = estimator.estimate(form=validated_form, prescription=prescription)
 
         # 4. Fusion dans le schéma de réponse consolidé

@@ -23,8 +23,22 @@ class MetricsEstimator:
         form: SimulationInputSchema,
         prescription: PrescriptionOutputSchema,
     ) -> ProjectionOutputSchema:
-        meta_budget = prescription.meta_ads_allocation.budget_fcfa
-        wa_budget = prescription.whatsapp_ads_allocation.budget_fcfa
+        return self.estimate_for_allocations(
+            form=form,
+            meta_budget=prescription.meta_ads_allocation.budget_fcfa,
+            wa_budget=prescription.whatsapp_ads_allocation.budget_fcfa,
+            max_supported_leads=prescription.max_supported_leads,
+            bottleneck=prescription.operational_bottleneck_detected,
+        )
+
+    def estimate_for_allocations(
+        self,
+        form: SimulationInputSchema,
+        meta_budget: float,
+        wa_budget: float,
+        max_supported_leads: int,
+        bottleneck: bool = False,
+    ) -> ProjectionOutputSchema:
         total_budget = form.total_budget_fcfa
         basket = form.average_basket_fcfa
 
@@ -54,7 +68,7 @@ class MetricsEstimator:
         cost_per_wa_lead = self.benchmark["cost_per_whatsapp_lead_fcfa"]
         if wa_budget > 0:
             raw_leads = wa_budget / cost_per_wa_lead
-            expected_leads = int(min(raw_leads, prescription.max_supported_leads))
+            expected_leads = int(min(raw_leads, max_supported_leads))
         else:
             expected_leads = 0
 
@@ -97,7 +111,7 @@ class MetricsEstimator:
             total_budget=total_budget,
             has_followers=(form.facebook_followers or 0) > 500,
             has_contacts=(form.whatsapp_contacts or 0) > 100,
-            bottleneck=prescription.operational_bottleneck_detected,
+            bottleneck=bottleneck,
         )
 
         return ProjectionOutputSchema(
