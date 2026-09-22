@@ -104,7 +104,32 @@ class SimulationFormatter:
             f"       👉 Pour chaque 1 000 FCFA investi en pub, vous générez environ {proj.roas_mean * 1000:,.0f} FCFA de CA.",
             "",
             f"  🎯 Indice de confiance statistique du modèle : {proj.confidence_score * 100:.0f}% (Haute fiabilité)",
-            "================================================================================",
         ])
+
+        if response.ai_enrichment:
+            ai = response.ai_enrichment
+            lines.extend([
+                "",
+                "--------------------------------------------------------------------------------",
+                f" 🤖 4. ENRICHISSEMENT STRATÉGIQUE & SCRIPTS CRÉATIFS (IA - {ai.provider_used.upper()})",
+                "--------------------------------------------------------------------------------",
+                "  📌 Synthèse Stratégique :",
+                f"     {ai.strategic_summary}",
+                "",
+                "  🔥 Accroches Publicitaires Suggérées (Meta Ads) :",
+            ])
+            for idx, copy in enumerate(ai.ad_copy_ideas, 1):
+                lines.append(f"     {idx}. [{copy.angle}] {copy.hook} → CTA: {copy.cta}")
+
+            if ai.whatsapp_sales_script:
+                lines.extend([
+                    "",
+                    "  💬 Scripts de Conversion WhatsApp :",
+                    f"     • Accueil    : {ai.whatsapp_sales_script.welcome.strip()}",
+                    f"     • Relance 2h : {ai.whatsapp_sales_script.follow_up_2h.strip()}",
+                    f"     • Closing    : {ai.whatsapp_sales_script.closing.strip()}",
+                ])
+
+        lines.append("================================================================================")
 
         return "\n".join(lines)

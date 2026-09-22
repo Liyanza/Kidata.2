@@ -13,6 +13,19 @@ class Settings(BaseSettings):
     # Base de données PostgreSQL (SQLAlchemy 2.0 Async)
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/liyanza_db"
 
+    # Selection du provider LLM ("grok", "gemini", "auto")
+    LLM_PROVIDER: str = "grok"
+
+    # Grok LLM / xAI
+    GROK_API_KEY: Union[str, None] = None
+    XAI_API_KEY: Union[str, None] = None
+    GROK_MODEL: str = "grok-3-mini"
+    GROK_API_BASE: str = "https://api.x.ai/v1"
+
+    # Gemini LLM / IA
+    GEMINI_API_KEY: Union[str, None] = None
+    GEMINI_MODEL: str = "gemini-1.5-flash"
+
     # CORS
     BACKEND_CORS_ORIGINS: List[Union[str, AnyHttpUrl]] = [
         "http://localhost:3000",

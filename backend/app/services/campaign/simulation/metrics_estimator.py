@@ -81,7 +81,7 @@ class MetricsEstimator:
         wa_sales_mean = expected_leads * closing_mean
         wa_sales_max = expected_leads * closing_max
 
-        direct_clicks = int((meta_budget / (cpm_mean / 1000.0)) * ctr) if meta_budget > 0 else 0
+        direct_clicks = int(((meta_budget / (cpm_mean / 1000.0)) * ctr) * (1.0 + followers_boost)) if meta_budget > 0 else 0
         direct_sales_min = direct_clicks * DIRECT_WEB_CONVERSION_RATE["min"]
         direct_sales_mean = direct_clicks * DIRECT_WEB_CONVERSION_RATE["mean"]
         direct_sales_max = direct_clicks * DIRECT_WEB_CONVERSION_RATE["max"]

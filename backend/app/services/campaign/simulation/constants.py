@@ -35,7 +35,7 @@ CITY_BENCHMARKS: Dict[str, Dict[str, Any]] = {
         "cpm_mean_fcfa": 1650.0,
         "ctr_mean": 0.018,
         "cost_per_whatsapp_lead_fcfa": 190.0,
-        "ad_frequency_factor": 1.6,
+        "ad_frequency_factor": 1.6,      
     },
 }
 
