@@ -13,6 +13,8 @@ htmlcov/
 env/
 venv/
 ENV/
+.env
+.env.*
 
 # IDE / OS
 .vscode/

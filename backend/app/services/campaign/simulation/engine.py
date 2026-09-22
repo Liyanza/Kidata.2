@@ -4,6 +4,7 @@ from app.schemas.simulation import (
     SimulationInputSchema,
     SimulationResponseSchema,
 )
+from app.services.campaign.knowledge.enrichment_service import CampaignAIEnricher
 from app.services.campaign.simulation.budget_allocator import BudgetAllocator
 from app.services.campaign.simulation.constants import CITY_BENCHMARKS
 from app.services.campaign.simulation.form_parser import SimulationFormParser
@@ -14,7 +15,11 @@ class SimulationEngine:
     """Point d'entrée de service stateless exécutant le pipeline complet de prescription & projection."""
 
     @classmethod
-    def run(cls, payload: SimulationInputSchema) -> SimulationResponseSchema:
+    def run(
+        cls,
+        payload: SimulationInputSchema,
+        include_ai_enrichment: bool = True,
+    ) -> SimulationResponseSchema:
         # 1. Normalisation et validation
         validated_form, city_key = SimulationFormParser.parse_and_validate(payload)
         benchmark = CITY_BENCHMARKS[city_key]
@@ -36,10 +41,20 @@ class SimulationEngine:
 
         projections = estimator.estimate(form=validated_form, prescription=prescription)
 
-        # 4. Fusion dans le schéma de réponse consolidé
+        # 4. Enrichissement prescriptif par la Base de Connaissances / IA LLM
+        ai_enrichment = None
+        if include_ai_enrichment:
+            ai_enrichment = CampaignAIEnricher.enrich(
+                form=validated_form,
+                prescription=prescription,
+                projections=projections,
+            )
+
+        # 5. Fusion dans le schéma de réponse consolidé
         return SimulationResponseSchema(
             input_summary=validated_form,
             prescription=prescription,
             projections=projections,
+            ai_enrichment=ai_enrichment,
             created_at=datetime.now(timezone.utc),
         )

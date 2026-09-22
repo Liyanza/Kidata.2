@@ -1,7 +1,7 @@
 """Schémas Pydantic v2 pour la validation des entrées et sorties de simulation."""
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -176,8 +176,29 @@ class PrescriptionOutputSchema(BaseModel):
     )
 
 
+class AdCopyIdeaSchema(BaseModel):
+    hook: str = Field(..., description="Phrase d'accroche captivante pour la pub")
+    angle: str = Field(..., description="Angle marketing (ex: Rareté, Preuve Sociale, Urgence)")
+    cta: str = Field(..., description="Appel à l'action recommandé")
+
+
+class WhatsAppSalesScriptSchema(BaseModel):
+    welcome: str = Field(..., description="Message d'accueil automatique ou manuel lors de l'arrivée du lead")
+    follow_up_2h: str = Field(..., description="Relance douce après 2h sans réponse")
+    closing: str = Field(..., description="Demande d'informations pour la validation de commande et livraison")
+
+
+class AIEnrichmentSchema(BaseModel):
+    strategic_summary: str = Field(..., description="Synthèse stratégique rédigée par l'IA d'après la base de connaissances")
+    ad_copy_ideas: List[AdCopyIdeaSchema] = Field(default_factory=list, description="Idées de copies et accroches publicitaires")
+    whatsapp_sales_script: WhatsAppSalesScriptSchema = Field(..., description="Scripts de vente et closing WhatsApp")
+    market_insights: Dict[str, Any] = Field(default_factory=dict, description="Insights comportementaux sur la zone ciblée")
+    provider_used: str = Field(default="knowledge_base_rules", description="Source d'enrichissement ('gemini_llm' ou 'knowledge_base_rules')")
+
+
 class SimulationResponseSchema(BaseModel):
     input_summary: SimulationInputSchema
     prescription: PrescriptionOutputSchema
     projections: ProjectionOutputSchema
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    ai_enrichment: Optional[AIEnrichmentSchema] = Field(None, description="Enrichissement prescriptif et copies créatives générés par l'IA / Base de Connaissances")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
